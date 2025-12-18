@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spelling Adventure - Picture Version</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+        }
+        
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(to bottom, #4facfe 0%, #00f2fe 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            touch-action: manipulation;
+        }
+        
+        .game-container {
+            width: 95%;
+            max-width: 500px;
+            background-color: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            padding: 15px;
+            text-align: center;
+        }
+        
+        h1 {
+            color: #ff6b6b;
+            text-shadow: 2px 2px 0 #ffe66d;
+            font-size: 2rem;
+            margin: 10px 0;
+        }
+        
+        .screen {
+            display: none;
+            padding: 15px;
+        }
+        
+        .active {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .btn {
+            background-color: #4ecdc4;
+            color: white;
+            border: none;
+            padding: 14px 20px;
+            margin: 8px;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 0 #45b7af;
+            min-width: 140px;
+            min-height: 50px;
+        }
+        
+        .btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 0 0 #45b7af;
+        }
+        
+        .level-btn {
+            background-color: #ff9f43;
+            box-shadow: 0 4px 0 #e67e22;
+            width: 85%;
+            margin: 12px auto;
+            display: block;
+        }
+        
+        .level-btn:active {
+            box-shadow: 0 0 0 #e67e22;
+        }
+        
+        .word-display {
+            font-size: 2.2rem;
+            color: #2d3436;
+            margin: 20px 0;
+            letter-spacing: 4px;
+            line-height: 1.4;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .hint {
+            color: #636e72;
+            font-style: italic;
+            margin: 12px 0;
+            min-height: 40px;
+            font-size: 1rem;
+            padding: 0 10px;
+        }
+        
+        .input-area {
+            margin: 15px 0;
+        }
+        
+        input[type="text"] {
+            padding: 14px 16px;
+            font-size: 1.3rem;
+            border: 3px solid #74b9ff;
+            border-radius: 12px;
+            text-align: center;
+            width: 90%;
+            max-width: 300px;
+            margin-bottom: 15px;
+        }
+        
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #0984e3;
+        }
+        
+        .feedback {
+            font-size: 1.6rem;
+            margin: 15px 0;
+            min-height: 50px;
+            padding: 0 10px;
+        }
+        
+        .correct {
+            color: #2ecc71;
+        }
+        
+        .incorrect {
+            color: #e74c3c;
+        }
+        
+        .score-container {
+            display: flex;
+            justify-content: center;
+            margin: 15px 0;
+        }
+        
+        .star {
+            font-size: 2rem;
+            color: #ddd;
+            margin: 0 3px;
+        }
+        
+        .earned {
+            color: #f1c40f;
+            animation: pulse 0.5s;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.3); }
+            100% { transform: scale(1); }
+        }
+        
+        .progress-bar {
+            height: 16px;
+            background-color: #ecf0f1;
+            border-radius: 8px;
+            margin: 15px 0;
+            overflow: hidden;
+            width: 90%;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .progress {
+            height: 100%;
+            background-color: #10ac84;
+            width: 0%;
+            transition: width 0.5s;
+        }
+        
+        .picture-container {
+            width: 200px;
+            height: 200px;
+            margin: 15px auto;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f8f9fa;
+            border: 3px solid #74b9ff;
+        }
+        
+        .picture {
+            font-size: 100px;
+            line-height: 1;
+        }
+        
+        .character {
+            font-size: 4rem;
+            margin: 15px 0;
+        }
+        
+        .options {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin: 15px 0;
+            gap: 8px;
+        }
+        
+        .option {
+            background-color: #dfe6e9;
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-size: 1.3rem;
+            cursor: pointer;
+            min-width: 50px;
+            transition: all 0.2s;
+            touch-action: manipulation;
+        }
+        
+        .option:active {
+            background-color: #b2bec3;
+            transform: scale(0.95);
+        }
+        
+        .reward {
+            font-size: 6rem;
+            margin: 15px 0;
+            animation: bounce 1s infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+        
+        .audio-btn {
+            background-color: #ff9ff3;
+            box-shadow: 0 4px 0 #f368e0;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            font-size: 1.6rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0 auto 15px;
+            cursor: pointer;
+        }
+        
+        .audio-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 0 0 #f368e0;
+        }
+        
+        .volume-control {
+            margin: 12px 0;
+        }
+        
+        input[type="range"] {
+            width: 80%;
+            max-width: 200px;
+        }
+        
+        .mobile-controls {
+            display: flex;
+            justify-content: center;
+            margin: 15px 0;
+            gap: 20px;
+        }
+        
+        .control-btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: #74b9ff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+            box-shadow: 0 4px 0 #0984e3;
+            border: none;
+        }
+        
+        .control-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 0 0 #0984e3;
+        }
+        
+        .keyboard-toggle {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: #fd79a8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+            box-shadow: 0 4px 0 #e84393;
+            border: none;
+            z-index: 100;
+        }
+        
+        .keyboard-toggle:active {
+            transform: translateY(4px);
+            box-shadow: 0 0 0 #e84393;
+        }
+        
+        @media (max-width: 400px) {
+            .game-container {
+                width: 98%;
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .btn {
+                padding: 12px 16px;
+                font-size: 1rem;
+                min-width: 120px;
+            }
+            
+            .word-display {
+                font-size: 1.8rem;
+            }
+            
+            .picture-container {
+                width: 160px;
+                height: 160px;
+            }
+            
+            .picture {
+                font-size: 80px;
+            }
+            
+            .character {
+                font-size: 3.5rem;
+            }
+            
+            .option {
+                padding: 10px 14px;
+                font-size: 1.2rem;
+                min-width: 45px;
+            }
+            
+            .control-btn {
+                width: 50px;
+                height: 50px;
+            }
+        }
+        
+        /* Prevent zoom on input focus for iOS */
+        @media screen and (max-width: 767px) {
+            input[type="text"] {
+                font-size: 16px !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>Spelling Adventure</h1>
+        
+        <!-- Start Screen -->
+        <div id="start-screen" class="screen active">
+            <div class="character">🐶</div>
+            <p>Welcome to Spelling Adventure! Look at the picture and spell the word correctly.</p>
+            <button id="start-btn" class="btn">Let's Start!</button>
+        </div>
+        
+        <!-- Level Selection Screen -->
+        <div id="level-screen" class="screen">
+            <div class="character">🐱</div>
+            <p>Choose your level:</p>
+            <button class="btn level-btn" data-level="nursery">Nursery</button>
+            <button class="btn level-btn" data-level="primary1">Primary 1-2</button>
+            <button class="btn level-btn" data-level="primary2">Primary 3-6</button>
+        </div>
+        
+        <!-- Game Screen -->
+        <div id="game-screen" class="screen">
+            <div class="progress-bar">
+                <div class="progress" id="progress"></div>
+            </div>
+            <div class="score-container">
+                <span class="star">★</span>
+                <span class="star">★</span>
+                <span class="star">★</span>
+                <span class="star">★</span>
+                <span class="star">★</span>
+            </div>
+            <div class="picture-container">
+                <div class="picture" id="picture">🐱</div>
+            </div>
+            <div class="word-display" id="word-display">_ _ _</div>
+            <div class="hint" id="hint"></div>
+            
+            <!-- Audio Play Button -->
+            <div class="audio-btn" id="audio-btn">🔊</div>
+            <div class="volume-control">
+                <label for="volume">Volume:</label>
+                <input type="range" id="volume" min="0" max="1" step="0.1" value="0.7">
+            </div>
+            
+            <div class="input-area">
+                <input type="text" id="answer-input" placeholder="Type the word" autocomplete="off" inputmode="text">
+                <button id="submit-btn" class="btn">Submit</button>
+            </div>
+            
+            <!-- Mobile-friendly controls -->
+            <div class="mobile-controls">
+                <button class="control-btn" id="hint-btn">💡</button>
+                <button class="control-btn" id="repeat-btn">🔊</button>
+                <button class="control-btn" id="clear-btn">⌫</button>
+            </div>
+            
+            <div class="feedback" id="feedback"></div>
+            <div class="options" id="options"></div>
+        </div>
+        
+        <!-- Reward Screen -->
+        <div id="reward-screen" class="screen">
+            <div class="reward">🏆</div>
+            <h2>Congratulations!</h2>
+            <p>You've completed the level!</p>
+            <p>You earned <span id="score">0</span> out of 5 stars!</p>
+            <button id="play-again-btn" class="btn">Play Again</button>
+        </div>
+    </div>
+
+    <button class="keyboard-toggle" id="keyboard-toggle" title="Show keyboard">
+        <i class="fas fa-keyboard"></i>
+    </button>
+
+    <script>
+        // Game data with words and corresponding emojis for different levels
+        // Expanded to 50 questions total
+        const wordLists = {
+            nursery: [
+                { word: "cat", hint: "A furry animal that says 'meow'", emoji: "🐱" },
+                { word: "dog", hint: "A friendly animal that barks", emoji: "🐶" },
+                { word: "sun", hint: "Shines in the sky during the day", emoji: "☀️" },
+                { word: "hat", hint: "You wear this on your head", emoji: "🧢" },
+                { word: "ball", hint: "Round toy you can throw and bounce", emoji: "⚽" },
+                { word: "cup", hint: "You drink from this", emoji: "🥤" },
+                { word: "pen", hint: "You write with this", emoji: "🖊️" },
+                { word: "bus", hint: "A big vehicle that carries people", emoji: "🚌" },
+                { word: "egg", hint: "Comes from a chicken", emoji: "🥚" },
+                { word: "fish", hint: "Swims in water", emoji: "🐠" },
+                { word: "hand", hint: "You have two of these at the end of your arms", emoji: "✋" },
+                { word: "book", hint: "You read this to learn stories", emoji: "📚" },
+                { word: "tree", hint: "Has leaves and branches", emoji: "🌳" },
+                { word: "star", hint: "Twinkles in the night sky", emoji: "⭐" },
+                { word: "moon", hint: "Shines at night", emoji: "🌙" },
+                { word: "bird", hint: "Has feathers and can fly", emoji: "🐦" },
+                { word: "duck", hint: "Swims in ponds and says 'quack'", emoji: "🦆" },
+                { word: "frog", hint: "Jumps and says 'ribbit'", emoji: "🐸" },
+                { word: "cake", hint: "A sweet treat for birthdays", emoji: "🎂" },
+                { word: "bell", hint: "Makes a ringing sound", emoji: "🔔" }
+            ],
+            primary1: [
+                { word: "apple", hint: "A red or green fruit that grows on trees", emoji: "🍎" },
+                { word: "house", hint: "A place where people live", emoji: "🏠" },
+                { word: "water", hint: "Clear liquid that we drink", emoji: "💧" },
+                { word: "happy", hint: "Feeling of joy or pleasure", emoji: "😊" },
+                { word: "teacher", hint: "Someone who helps you learn", emoji: "👩‍🏫" },
+                { word: "friend", hint: "Someone you like to spend time with", emoji: "👫" },
+                { word: "family", hint: "People related to you", emoji: "👨‍👩‍👧‍👦" },
+                { word: "school", hint: "A place where you go to learn", emoji: "🏫" },
+                { word: "flower", hint: "A plant with colorful petals", emoji: "🌼" },
+                { word: "garden", hint: "A place where plants grow", emoji: "🌷" },
+                { word: "pencil", hint: "You use this to write and draw", emoji: "✏️" },
+                { word: "window", hint: "You look through this to see outside", emoji: "🪟" },
+                { word: "rabbit", hint: "A small animal with long ears", emoji: "🐰" },
+                { word: "butter", hint: "A yellow spread for bread", emoji: "🧈" },
+                { word: "yellow", hint: "The color of the sun", emoji: "🟨" },
+                { word: "orange", hint: "A color and a fruit", emoji: "🍊" },
+                { word: "purple", hint: "A color made by mixing red and blue", emoji: "🟪" },
+                { word: "banana", hint: "A long yellow fruit", emoji: "🍌" },
+                { word: "carrot", hint: "An orange vegetable that rabbits like", emoji: "🥕" },
+                { word: "circle", hint: "A round shape", emoji: "⭕" }
+            ],
+            primary2: [
+                { word: "beautiful", hint: "Very pretty or attractive", emoji: "🌸" },
+                { word: "mountain", hint: "A very high hill", emoji: "⛰️" },
+                { word: "adventure", hint: "An exciting experience", emoji: "🧭" },
+                { word: "celebrate", hint: "To do something special for an important event", emoji: "🎉" },
+                { word: "knowledge", hint: "Information and understanding about a subject", emoji: "📚" },
+                { word: "butterfly", hint: "An insect with colorful wings", emoji: "🦋" },
+                { word: "chocolate", hint: "A sweet brown treat", emoji: "🍫" },
+                { word: "elephant", hint: "A very large animal with a trunk", emoji: "🐘" },
+                { word: "furniture", hint: "Tables, chairs, and beds are examples", emoji: "🪑" },
+                { word: "giraffe", hint: "A tall animal with a long neck", emoji: "🦒" },
+                { word: "hamburger", hint: "A popular food with a patty in a bun", emoji: "🍔" },
+                { word: "important", hint: "Something that matters a lot", emoji: "❗" },
+                { word: "jellyfish", hint: "A sea creature that can sting", emoji: "🎐" },
+                { word: "kangaroo", hint: "An Australian animal that hops", emoji: "🦘" },
+                { word: "librarian", hint: "A person who works in a library", emoji: "📖" },
+                { word: "mushroom", hint: "A type of fungus that can be eaten", emoji: "🍄" },
+                { word: "notebook", hint: "A book with blank pages for writing", emoji: "📓" },
+                { word: "octopus", hint: "A sea creature with eight arms", emoji: "🐙" },
+                { word: "pajamas", hint: "Clothes you wear to sleep", emoji: "🛏️" },
+                { word: "question", hint: "Something you ask when you want to know something", emoji: "❓" },
+                { word: "restaurant", hint: "A place where you go to eat food", emoji: "🍽️" },
+                { word: "sandwich", hint: "Food with filling between two slices of bread", emoji: "🥪" },
+                { word: "telescope", hint: "A tool for looking at distant objects", emoji: "🔭" },
+                { word: "umbrella", hint: "You use this when it rains", emoji: "☂️" },
+                { word: "vegetable", hint: "A plant that you can eat", emoji: "🥦" },
+                { word: "waterfall", hint: "Water flowing over a cliff", emoji: "🌊" },
+                { word: "xylophone", hint: "A musical instrument with wooden bars", emoji: "🎵" },
+                { word: "yesterday", hint: "The day before today", emoji: "📅" },
+                { word: "zookeeper", hint: "A person who takes care of animals in a zoo", emoji: "🐾" },
+                { word: "whisper", hint: "To speak very quietly", emoji: "🤫" }
+            ]
+        };
+
+        // Game state
+        let currentLevel = '';
+        let currentWordIndex = 0;
+        let score = 0;
+        let stars = 0;
+        let synth = window.speechSynthesis;
+        let volumeControl = document.getElementById('volume');
+
+        // DOM elements
+        const startScreen = document.getElementById('start-screen');
+        const levelScreen = document.getElementById('level-screen');
+        const gameScreen = document.getElementById('game-screen');
+        const rewardScreen = document.getElementById('reward-screen');
+        
+        const startBtn = document.getElementById('start-btn');
+        const levelBtns = document.querySelectorAll('.level-btn');
+        const submitBtn = document.getElementById('submit-btn');
+        const playAgainBtn = document.getElementById('play-again-btn');
+        const audioBtn = document.getElementById('audio-btn');
+        const hintBtn = document.getElementById('hint-btn');
+        const repeatBtn = document.getElementById('repeat-btn');
+        const clearBtn = document.getElementById('clear-btn');
+        const keyboardToggle = document.getElementById('keyboard-toggle');
+        
+        const pictureElement = document.getElementById('picture');
+        const wordDisplay = document.getElementById('word-display');
+        const hintElement = document.getElementById('hint');
+        const answerInput = document.getElementById('answer-input');
+        const feedbackElement = document.getElementById('feedback');
+        const progressBar = document.getElementById('progress');
+        const starElements = document.querySelectorAll('.star');
+        const optionsContainer = document.getElementById('options');
+        const scoreElement = document.getElementById('score');
+
+        // Event listeners
+        startBtn.addEventListener('click', () => {
+            showScreen(levelScreen);
+        });
+
+        levelBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                currentLevel = e.target.dataset.level;
+                startGame();
+            });
+        });
+
+        submitBtn.addEventListener('click', checkAnswer);
+        
+        answerInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                checkAnswer();
+            }
+        });
+
+        playAgainBtn.addEventListener('click', () => {
+            showScreen(levelScreen);
+        });
+
+        audioBtn.addEventListener('click', speakCurrentWord);
+        repeatBtn.addEventListener('click', speakCurrentWord);
+        
+        hintBtn.addEventListener('click', () => {
+            // Show hint with a fun animation
+            hintElement.style.fontSize = '1.2rem';
+            setTimeout(() => {
+                hintElement.style.fontSize = '1rem';
+            }, 300);
+        });
+        
+        clearBtn.addEventListener('click', () => {
+            answerInput.value = '';
+            answerInput.focus();
+        });
+        
+        keyboardToggle.addEventListener('click', () => {
+            answerInput.focus();
+        });
+
+        // Function to speak the current word
+        function speakCurrentWord() {
+            if (synth.speaking) {
+                synth.cancel();
+            }
+            
+            const wordData = wordLists[currentLevel][currentWordIndex];
+            const utterance = new SpeechSynthesisUtterance(wordData.word);
+            
+            // Set utterance properties
+            utterance.volume = volumeControl.value;
+            utterance.rate = 0.8;
+            utterance.pitch = 1;
+            
+            // Speak the word
+            synth.speak(utterance);
+            
+            // Add animation to audio button
+            audioBtn.style.transform = 'scale(1.2)';
+            setTimeout(() => {
+                audioBtn.style.transform = 'scale(1)';
+            }, 300);
+        }
+
+        // Function to start the game
+        function startGame() {
+            currentWordIndex = 0;
+            score = 0;
+            stars = 0;
+            updateStars();
+            showScreen(gameScreen);
+            loadWord();
+        }
+
+        // Function to load a word
+        function loadWord() {
+            const wordData = wordLists[currentLevel][currentWordIndex];
+            
+            // Display the picture (emoji)
+            pictureElement.textContent = wordData.emoji;
+            
+            // Display word with appropriate difficulty
+            const hiddenWord = hideSomeLetters(wordData.word, currentLevel);
+            wordDisplay.textContent = hiddenWord;
+            
+            hintElement.textContent = wordData.hint;
+            answerInput.value = '';
+            answerInput.focus();
+            
+            // Update progress bar
+            const progress = ((currentWordIndex) / wordLists[currentLevel].length) * 100;
+            progressBar.style.width = progress + '%';
+            
+            // For nursery level, show letter options
+            if (currentLevel === 'nursery') {
+                showLetterOptions(wordData.word);
+            } else {
+                optionsContainer.innerHTML = '';
+            }
+            
+            feedbackElement.textContent = '';
+            
+            // Speak the word automatically after a short delay
+            setTimeout(speakCurrentWord, 500);
+        }
+
+        // Function to hide some letters in a word based on level
+        function hideSomeLetters(word, level) {
+            let hiddenCount;
+            
+            if (level === 'nursery') {
+                // For nursery, hide fewer letters
+                hiddenCount = Math.min(2, Math.floor(word.length / 2));
+            } else if (level === 'primary1') {
+                // For primary1, hide a moderate number of letters
+                hiddenCount = Math.min(3, Math.floor(word.length / 1.5));
+            } else {
+                // For primary2, hide more letters
+                hiddenCount = Math.min(5, Math.floor(word.length / 1.2));
+            }
+            
+            return hideLetters(word, hiddenCount);
+        }
+
+        // Function to hide specific letters in a word
+        function hideLetters(word, count) {
+            const hiddenIndices = [];
+            const wordArray = word.split('');
+            
+            // Select random indices to hide
+            while (hiddenIndices.length < count) {
+                const randomIndex = Math.floor(Math.random() * word.length);
+                if (!hiddenIndices.includes(randomIndex)) {
+                    hiddenIndices.push(randomIndex);
+                }
+            }
+            
+            // Replace selected letters with underscores
+            hiddenIndices.forEach(index => {
+                wordArray[index] = '_';
+            });
+            
+            return wordArray.join(' ');
+        }
+
+        // Function to show letter options for nursery level
+        function showLetterOptions(word) {
+            optionsContainer.innerHTML = '';
+            
+            // Get the missing letters
+            const missingLetters = [];
+            const hiddenWord = wordDisplay.textContent.split(' ');
+            
+            for (let i = 0; i < hiddenWord.length; i++) {
+                if (hiddenWord[i] === '_') {
+                    missingLetters.push(word[i].toUpperCase());
+                }
+            }
+            
+            // Create wrong options
+            const options = [...missingLetters];
+            while (options.length < 6) {
+                const randomLetter = String.fromCharCode(65 + Math.floor(Math.random() * 26));
+                if (!options.includes(randomLetter)) {
+                    options.push(randomLetter);
+                }
+            }
+            
+            // Shuffle options
+            options.sort(() => Math.random() - 0.5);
+            
+            // Create option buttons
+            options.forEach(letter => {
+                const option = document.createElement('div');
+                option.className = 'option';
+                option.textContent = letter;
+                option.addEventListener('click', () => {
+                    // Find the first underscore and replace it
+                    const currentDisplay = wordDisplay.textContent.split(' ');
+                    const index = currentDisplay.indexOf('_');
+                    if (index !== -1) {
+                        currentDisplay[index] = letter.toLowerCase();
+                        wordDisplay.textContent = currentDisplay.join(' ');
+                    }
+                });
+                optionsContainer.appendChild(option);
+            });
+        }
+
+        // Function to check the answer
+        function checkAnswer() {
+            const userAnswer = answerInput.value.trim().toLowerCase();
+            const correctAnswer = wordLists[currentLevel][currentWordIndex].word.toLowerCase();
+            
+            if (userAnswer === correctAnswer) {
+                // Correct answer
+                feedbackElement.textContent = 'Correct! Well done!';
+                feedbackElement.className = 'feedback correct';
+                score++;
+                
+                // Add animation to picture
+                pictureElement.style.transform = 'scale(1.2)';
+                setTimeout(() => {
+                    pictureElement.style.transform = 'scale(1)';
+                }, 300);
+                
+                // Play success sound
+                playSuccessSound();
+            } else {
+                // Incorrect answer
+                feedbackElement.textContent = `Oops! The correct spelling is: ${correctAnswer}`;
+                feedbackElement.className = 'feedback incorrect';
+                
+                // Play error sound
+                playErrorSound();
+            }
+            
+            // Move to next word after a delay
+            setTimeout(() => {
+                currentWordIndex++;
+                
+                if (currentWordIndex < wordLists[currentLevel].length) {
+                    loadWord();
+                } else {
+                    endGame();
+                }
+            }, 2000);
+        }
+
+        // Function to play success sound
+        function playSuccessSound() {
+            if (synth.speaking) {
+                synth.cancel();
+            }
+            
+            const utterance = new SpeechSynthesisUtterance("Correct!");
+            utterance.volume = volumeControl.value;
+            utterance.rate = 1.2;
+            utterance.pitch = 1.5;
+            synth.speak(utterance);
+        }
+
+        // Function to play error sound
+        function playErrorSound() {
+            if (synth.speaking) {
+                synth.cancel();
+            }
+            
+            const utterance = new SpeechSynthesisUtterance("Try again");
+            utterance.volume = volumeControl.value;
+            utterance.rate = 0.9;
+            utterance.pitch = 0.8;
+            synth.speak(utterance);
+        }
+
+        // Function to end the game and show rewards
+        function endGame() {
+            // Calculate stars based on score
+            stars = Math.floor((score / wordLists[currentLevel].length) * 5);
+            updateStars();
+            
+            scoreElement.textContent = stars;
+            
+            // Play congratulation message
+            if (synth.speaking) {
+                synth.cancel();
+            }
+            
+            const utterance = new SpeechSynthesisUtterance(
+                `Congratulations! You earned ${stars} out of 5 stars!`
+            );
+            utterance.volume = volumeControl.value;
+            synth.speak(utterance);
+            
+            showScreen(rewardScreen);
+        }
+
+        // Function to update star display
+        function updateStars() {
+            starElements.forEach((star, index) => {
+                if (index < stars) {
+                    star.classList.add('earned');
+                } else {
+                    star.classList.remove('earned');
+                }
+            });
+        }
+
+        // Function to show a specific screen
+        function showScreen(screen) {
+            // Hide all screens
+            startScreen.classList.remove('active');
+            levelScreen.classList.remove('active');
+            gameScreen.classList.remove('active');
+            rewardScreen.classList.remove('active');
+            
+            // Show the requested screen
+            screen.classList.add('active');
+        }
+        
+        // Prevent zoom on input focus on iOS
+        document.addEventListener('touchstart', function() {}, {passive: true});
+    </script>
+</body>
+</html>
